@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vũ Trụ Tiên Tri 🌌</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 1. NỀN VŨ TRỤ (BACKGROUND) --- */
+        :root {
+            --space-bg: #0b0d17;
+            --star-gold: #f1c40f;
+            --glow-blue: #00d2ff;
+            --moon-light: #fdfcdc;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--space-bg);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #2e0e42 0%, #0b0d17 70%),
+                radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.1), transparent 40%);
+            background-size: cover;
+            background-attachment: fixed;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Sao trời */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            opacity: var(--opacity);
+            z-index: 0;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Mặt Trăng */
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 15%;
+            width: 80px;
+            height: 80px;
+            background: var(--moon-light);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(253, 252, 220, 0.4);
+            z-index: 1;
+        }
+
+        /* --- 2. ĐỘI HÌNH SANTA (ĐÃ SỬA KHÓI) --- */
+        .santa-team {
+            position: fixed;
+            left: -200px; 
+            font-size: 1.2em; 
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .flying {
+            animation: flyRight 20s linear infinite;
+        }
+
+        @keyframes flyRight {
+            0% { left: -200px; transform: translateY(0); }
+            25% { transform: translateY(-20px); }
+            50% { transform: translateY(10px); }
+            75% { transform: translateY(-15px); }
+            100% { left: 110vw; transform: translateY(0); }
+        }
+
+        .deer {
+            transform: scaleX(-1); /* Lật tuần lộc sang phải */
+            display: inline-block;
+        }
+
+        .smoke {
+            font-size: 0.8em;
+            opacity: 0.5;
+            display: inline-block; /* Bắt buộc để transform hoạt động */
+            animation: puff 1s infinite alternate;
+        }
+        
+        /* ĐÃ SỬA: Thêm scaleX(-1) để lật ngược khói */
+        @keyframes puff {
+            0% { transform: translateX(5px) scale(0.8) scaleX(-1); opacity: 0.3; }
+            100% { transform: translateX(0) scale(1.2) scaleX(-1); opacity: 0.7; }
+        }
+
+        /* --- 3. QUẢ CẦU & GIAO DIỆN --- */
+        .oracle-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 90%;
+            max-width: 480px;
+        }
+
+        .crystal-ball {
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), #000);
+            border-radius: 50%;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            margin: 0 auto 30px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2), inset 0 0 60px rgba(0, 210, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .core {
+            width: 8px;
+            height: 8px;
+            background: var(--glow-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 20px 10px var(--glow-blue);
+            animation: pulse 3s infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(3); box-shadow: 0 0 40px 20px rgba(0, 210, 255, 0.4); }
+            100% { transform: scale(1); }
+        }
+
+        #result-text {
+            position: absolute;
+            width: 80%;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.6em;
+            color: #fff;
+            text-shadow: 0 0 10px #00d2ff;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+            line-height: 1.4;
+        }
+
+        .controls {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .mode-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .arrow-btn {
+            background: rgba(255,255,255,0.1);
+            color: var(--star-gold);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow-btn:hover { background: rgba(255,255,255,0.2); }
+
+        #mode-display {
+            font-weight: 700;
+            font-size: 1em;
+            color: var(--glow-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            user-select: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            text-align: center;
+        }
+        
+        input:focus { outline: none; border-color: var(--glow-blue); }
+
+        .main-btn {
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 12px 0;
+            font-size: 1em;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(37, 117, 252, 0.4);
+        }
+
+        .main-btn:hover { transform: translateY(-3px); }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+            transition: color 0.3s;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-btn:hover { color: white; }
+
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">❮ Về Khu Vườn</a>
+
+    <div id="stars-container"></div>
+    <div class="moon"></div>
+
+    <div class="santa-team" id="santa-team">
+        <span class="smoke">💨</span>
+        <span class="smoke">💨</span>
+        <span>🎅</span>
+        <span class="deer">🦌</span>
+    </div>
+
+    <div class="oracle-container">
+        <div class="crystal-ball" id="orb">
+            <div class="core" id="orb-core"></div>
+            <div id="result-text"></div>
+        </div>
+
+        <div class="controls">
+            <div class="mode-selector">
+                <button class="arrow-btn" onclick="changeMode(-1)">❮</button>
+                <span id="mode-display">🔮 Hỏi Có / Không</span>
+                <button class="arrow-btn" onclick="changeMode(1)">❯</button>
+            </div>
+            <input type="text" id="user-question" placeholder="Nhẩm trong đầu hoặcn nhập tâm tư vào đây..." autocomplete="off">
+            <button class="main-btn" onclick="askOracle()">Gửi Tín Hiệu</button>
+        </div>
+    </div>
+
+    <script>
+        const starsContainer = document.getElementById('stars-container');
+        for(let i=0; i<100; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.width = Math.random() * 2 + 'px';
+            star.style.height = star.style.width;
+            star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            star.style.setProperty('--opacity', Math.random());
+            starsContainer.appendChild(star);
+        }
+
+        const santaTeam = document.getElementById('santa-team');
+        santaTeam.addEventListener('animationiteration', () => {
+            const randomTop = Math.floor(Math.random() * 75) + 5; 
+            santaTeam.style.top = randomTop + '%';
+        });
+        santaTeam.style.top = '20%';
+        santaTeam.classList.add('flying');
+
+        const modes = [
+            { id: 'yesno', label: '🔮 Hỏi Có / Không' },
+            { id: 'advice', label: '🍀 Lời Khuyên Chữa Lành' },
+            { id: 'lucky', label: '🌈 Màu & Số May Mắn' },
+            { id: 'funny', label: '🤪 Hỏi Vui (Troll)' }
+        ];
+        let currentModeIndex = 0;
+
+        const answersDB = {
+            yesno: ["Vũ trụ bảo: DUYỆT NGAY! ✅", "Chắc chắn rồi chị đẹp.", "Tín hiệu rất tốt -> CÓ.", "Thôi bỏ đi, không đáng đâu.", "Để mai tính, giờ chưa phải lúc.", "Tuyệt đối KHÔNG.", "Có vẻ... 50/50 nha.", "Cứ làm tới đi!", "Hãy lắng nghe trái tim mình.", "Không nha, đừng cố chấp."],
+            advice: ["Nghỉ ngơi đi, việc gì khó có Long lo.", "Mua ngay món đồ chị đang thích đi.", "Deadline không đáng sợ, đáng sợ là quên ăn.", "Hôm nay cho phép bản thân lười biếng một chút.", "Đứng dậy đi dạo 5 phút đi.", "Sếp có mắng thì cứ để ngoài tai.", "Tối nay đi ngủ sớm nhé.", "Hãy tự thưởng cho mình một bữa ăn ngon.", "Đừng cau mày nữa, mau già lắm đấy!", "Chăm sóc bản thân trước, công việc tính sau."],
+            lucky: ["Màu may mắn: Đỏ Rượu Vang 🍷", "Màu may mắn: Xanh Pastel ☁️", "Số thần tài: 09", "Số may mắn: 22", "Vật phẩm: Nhẫn nhỏ.", "Màu trắng tinh khôi.", "Số: 68 (Lộc Phát)", "Màu hồng đất.", "Số: 10", "Màu đen huyền bí.", "Màu Vàng Gold.", "Tô son đỏ cam nhé."],
+            funny: ["Hỏi đầu gối còn chính xác hơn.", "Em chịu, hỏi mèo Xả xem.", "Vũ trụ đang bận ship quà.", "Câu này khó, bỏ qua.", "Mơ đi cưng.", "Ý trời: Chị phải bao Long đi ăn.", "Đừng hỏi nữa, cứ làm theo linh tính đi.", "Máy chủ quá tải vì sự xinh đẹp của chị."]
+        };
+
+        function changeMode(direction) {
+            currentModeIndex += direction;
+            if (currentModeIndex < 0) currentModeIndex = modes.length - 1;
+            if (currentModeIndex >= modes.length) currentModeIndex = 0;
+            
+            const display = document.getElementById('mode-display');
+            display.style.opacity = 0;
+            setTimeout(() => {
+                display.innerText = modes[currentModeIndex].label;
+                display.style.opacity = 1;
+            }, 200);
+        }
+
+        function askOracle() {
+            const button = document.querySelector('.main-btn');
+            const resultText = document.getElementById('result-text');
+            const core = document.getElementById('orb-core');
+            const orb = document.getElementById('orb');
+
+            button.disabled = true;
+            button.innerText = "✨ Đang kết nối vũ trụ... ✨";
+            
+            resultText.style.opacity = 0;
+            core.style.opacity = 1;
+            core.style.animation = "pulse 0.3s infinite";
+            orb.style.boxShadow = "0 0 60px rgba(0, 210, 255, 0.8)";
+
+            setTimeout(() => {
+                const currentModeKey = modes[currentModeIndex].id;
+                const answers = answersDB[currentModeKey];
+                const finalAnswer = answers[Math.floor(Math.random() * answers.length)];
+
+                core.style.opacity = 0;
+                core.style.animation = "pulse 3s infinite";
+                
+                resultText.innerText = finalAnswer;
+                resultText.style.opacity = 1;
+                resultText.style.transform = "scale(1)";
+                
+                orb.style.boxShadow = "0 0 30px rgba(0, 210, 255, 0.2)";
+                button.disabled = false;
+                button.innerText = "Gửi Tín Hiệu";
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

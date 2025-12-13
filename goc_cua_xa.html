@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Góc Của Xả - Boss Mèo Phán Xét 😼</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Cấu hình chung --- */
+        :root {
+            --bg-dark: #2c0e18;
+            --card-bg: #fff;
+            --gold: #fbbf24;
+            --text-color: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #581c1c 0%, #1a0505 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Tuyết rơi --- */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1em;
+            animation: fall linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Back Button --- */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: rgba(255,255,255,0.7);
+            font-size: 1.1em;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.3s;
+        }
+        .back-btn:hover { color: var(--gold); }
+
+        /* --- Header --- */
+        .header-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5em;
+            color: var(--gold);
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            z-index: 10;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .subtitle {
+            margin-bottom: 40px;
+            opacity: 0.8;
+            font-style: italic;
+            z-index: 10;
+            text-align: center;
+        }
+
+        /* --- CARD FLIP (Kỹ thuật lật bài 3D) --- */
+        .scene {
+            width: 300px; /* Điều chỉnh kích thước cho vừa vặn */
+            height: 450px;
+            perspective: 1000px;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            position: relative;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .scene:hover .card {
+            transform: scale(1.02);
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 4px solid var(--gold);
+        }
+
+        /* --- MẶT TRƯỚC --- */
+        .card__face--front {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .paw-print {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* --- MẶT SAU --- */
+        .card__face--back {
+            background: white;
+            color: var(--text-color);
+            transform: rotateY(180deg);
+            text-align: center;
+        }
+
+        .cat-photo {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px dashed #ddd;
+            background-color: #eee;
+        }
+
+        .cat-quote {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #d32f2f;
+            line-height: 1.4;
+            font-family: 'Nunito', sans-serif;
+            min-height: 80px; /* Giữ chiều cao để không bị nhảy */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .author {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* Nút rút bài khác */
+        .next-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: var(--gold);
+            color: #2c0e18;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+        }
+
+        .next-btn.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .next-btn:hover {
+            background: #fff;
+            transform: scale(1.1);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            .header-title { font-size: 2.5em; }
+            .scene { width: 280px; height: 420px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">❮ Về Khu Vườn</a>
+    <div id="snow-container"></div>
+
+    <div class="header-title">Góc Của Xả 😼</div>
+    <div class="subtitle">Bấm vào lá bài để nghe Hoàng Thượng ban chỉ...</div>
+
+    <div class="scene" onclick="flipCard()">
+        <div class="card" id="myCard">
+            <div class="card__face card__face--front">
+                <div class="paw-print">🐾</div>
+                <h2 style="font-family:'Dancing Script'">Xả's Tarot</h2>
+                <p style="opacity: 0.7; font-size: 0.9em;">(Chạm để lật)</p>
+            </div>
+
+            <div class="card__face card__face--back">
+                <img src="" alt="Mèo Xả" class="cat-photo" id="cat-img">
+                <div class="cat-quote" id="cat-text">...</div>
+                <div class="author">- Xả (The Boss) -</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="next-btn" onclick="resetCard()">Rút lá khác ↻</button>
+
+    <script>
+        // 1. Tạo Tuyết rơi
+        const snowContainer = document.getElementById('snow-container');
+        for(let i=0; i<50; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.textContent = '❄';
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+            snowContainer.appendChild(snowflake);
+        }
+
+        // 2. DATA: Bộ sưu tập 15 lá bài phán xét của Boss Xả
+        const memes = [
+            // --- NHÓM 1: CÀ KHỊA & CÔNG VIỆC ---
+            {
+                text: "Loài người thật kỳ lạ. Suốt ngày nhìn vào cái hộp phát sáng (máy tính) thay vì nhìn vào vẻ đẹp của Ta.",
+                img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHdqY281YnQ2eDRwbnF6eXJ6eXJ6eXJ6eXJ6eXJ6eXJ6eXJ6eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/MDJ9IbxxvDUQM/giphy.gif" 
+            },
+            {
+                text: "Deadline chạy bằng cơm, còn Ta chạy bằng Pate. Tắt máy đi ngủ ngay, không Ta cào ghế đấy!",
+                img: "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif"
+            },
+            {
+                text: "Việc hôm nay chớ để ngày mai. Hãy để cho... thằng khác làm. Còn mình thì vuốt ve Ta.",
+                img: "https://media.giphy.com/media/mlvseq9yvZhba/giphy.gif"
+            },
+            {
+                text: "Nhìn mặt Sen căng thẳng quá. Hít sâu vào... Thở ra... Rồi đi lấy pate cho Ta nhanh lên.",
+                img: "https://media1.tenor.com/m/0_LuqDocCYIAAAAd/m%C3%A8o-nh%E1%BA%A3y-me%C3%B2d%E1%BB%85th%C6%B0%C6%A1ng.gif"
+            },
+            {
+                text: "TABMISSS có thể treo, nhưng nhan sắc của Ta là vĩnh cửu. Ngắm Ta đi cho đỡ stress.",
+                img: "https://media.giphy.com/media/C9x8gX02SnMIoAClTn/giphy.gif"
+            },
+
+            // --- NHÓM 2: ĂN UỐNG & SẮC ĐẸP ---
+            {
+                text: "Giảm cân là tội ác với bản thân. Nhìn Ta xem, béo tròn mới là phúc hậu!",
+                img: "https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif"
+            },
+            {
+                text: "Hôm nay Ta thấy Sen xinh đấy. Nhưng xin lỗi, vẫn chưa xinh bằng Ta đâu. Meow~",
+                img: "https://media.tenor.com/O1UiQ9DUVU8AAAAM/dancing-cat.gif"
+            },
+            {
+                text: "Cấm cau mày! Nếp nhăn sẽ làm giảm giá trị nhan sắc của Sen đấy. Cười lên!",
+                img: "https://memedaily.vn/wp-content/uploads/2022/11/cat-massage.gif"
+            },
+            {
+                text: "Đừng trang điểm đậm quá, Sen để mặt mộc rồi cười tươi là khối anh xin chết (trong đó có tên Long).",
+                img: "https://mcdn.coolmate.me/image/March2023/meme-meo-cute-hai-huoc-1297_521.jpg"
+            },
+            {
+                text: "Ta ngửi thấy mùi... thưởng Tết. À nhầm, mùi gà luộc. Mang đây mau!",
+                img: "https://media.giphy.com/media/q1MeAPDDMb43K/giphy.gif"
+            },
+
+            // --- NHÓM 3: TÌNH CẢM & THẢ THÍNH HỘ ---
+            {
+                text: "Vũ trụ gửi tín hiệu: Có một người tên L... đang nhớ Sen đấy. (Không phải Ta đâu nha, đừng tưởng bở).",
+                img: "https://i.pinimg.com/originals/0d/3f/d1/0d3fd1b1410cfbee09b57505b63f6581.gif"
+            },
+            {
+                text: "Ta cho phép Sen đi chơi cuối tuần này. Nhớ mang quà ngon về, không thì đừng hòng vào nhà.",
+                img: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHk0ZzIyZXZvNW1hcjlmdDg1NTY4b3pxdDNvdXlyZ28xeWhwdXNueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/sP0SLcBdcPYqKKnfaY/giphy.gif"
+            },
+            {
+                text: "Cái tên Long tuy hơi ngốc nghếch nhưng được cái chiều Sen. Ta tạm duyệt tên 'con sen' sơ cua này.",
+                img: "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aGlsamM5NXc5Znk2ajFqaW5jZ2JhaXJ2OXk2Ync3MTd4ZmdzY2FodCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/6r8FatepbZggU/giphy.gif"
+            },
+            {
+                text: "Hạnh phúc không phải là có nhiều tiền. Hạnh phúc là có Ta và một người để sai vặt (như Long chẳng hạn).",
+                img: "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cms3aXNuZGd1NmNmejY4ejh1dWtmbGFhanlwczI5NGo3eTI5ZGYybCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/GYikUbu3p5UdyBhe4r/giphy.gif"
+            },
+
+            // --- NHÓM 4: TRIẾT LÝ VÔ TRI ---
+            {
+                text: "Tại sao loài người phải đi làm? Sao không ở nhà ngủ 18 tiếng/ngày như Ta? Thật khó hiểu.",
+                img: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbTB0cWIyeHpyZDFhaW9memw4MGZhMGhxYmh5NzI2cGw1Zjhrb2xvcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fJnPKA5tS7Dri/giphy.gif"
+            },
+	    {
+                text: "Cảnh báo khẩn cấp: Mật độ hạnh phúc sắp vượt ngưỡng an toàn. Đề nghị Sen chuẩn bị tinh thần!",
+                img: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExenQwbTNscm5zcjE4M2U3NDJoa2JkdjJpa2ZtYzN3aGF4dzF0bXhwYSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/rZ7A5ayCa2zVcMgsvl/giphy.gif"
+            },
+		{
+                text: "Ngai vàng đã tọa, điện thoại đã cầm. Giờ là lúc ban phát tình yêu 'trực tuyến' cho nhân loại. Các 'con Sen' vui lòng giữ trật tự!",
+                img: "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZjgxYWp5emN5c3F2eHdueGM1eTdiZG05cnM2MTBycXVoaHQ5NG5hbyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mNDSeTli6WGWCovcgv/giphy.gif"
+            },
+            {
+                text: "Nếu cảm thấy bế tắc, hãy thử nằm ngửa bụng lên trần nhà. Không giải quyết được gì nhưng mà nó mát.",
+                img: "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZjdyaWtib3V6OHpmNm41aWp4ODRvZHF2YTZ6cHVoa3Bmc2xnd2xoMyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oKIPCSX4UHmuS41TG/giphy.gif"
+            }
+        ];
+
+        let isFlipped = false;
+        const card = document.getElementById('myCard');
+        const nextBtn = document.querySelector('.next-btn');
+        const catImg = document.getElementById('cat-img');
+        const catText = document.getElementById('cat-text');
+
+        function flipCard() {
+            if (isFlipped) return; // Nếu đã lật rồi thì không lật lại bằng click thẻ
+
+            // 1. Random nội dung trước khi lật
+            const randomMeme = memes[Math.floor(Math.random() * memes.length)];
+            
+            // Cập nhật nội dung mặt sau
+            catImg.src = randomMeme.img;
+            catText.innerText = `"${randomMeme.text}"`;
+
+            // 2. Thực hiện lật
+            card.classList.add('is-flipped');
+            isFlipped = true;
+
+            // 3. Hiện nút rút lại sau 1 giây
+            setTimeout(() => {
+                nextBtn.classList.add('show');
+            }, 800);
+        }
+
+        function resetCard() {
+            // Lật úp lại
+            card.classList.remove('is-flipped');
+            nextBtn.classList.remove('show');
+            isFlipped = false;
+        }
+
+    </script>
+</body>
+</html>
