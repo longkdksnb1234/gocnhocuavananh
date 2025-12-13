@@ -20,32 +20,27 @@
             font-family: 'Nunito', sans-serif;
             color: var(--white);
             min-height: 100vh;
+            /* GIỮ NGUYÊN NỀN ĐỎ ĐEN CŨ */
             background: linear-gradient(180deg, var(--night-blue) 0%, var(--night-blue) 40%, #581c1c 80%, var(--warm-red) 100%);
             background-attachment: fixed;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Ẩn thanh cuộn ngang */
         }
 
-        /* --- Hiệu ứng tuyết rơi --- */
-        .snowflake {
-            position: fixed;
-            top: -10px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1em;
-            text-shadow: 0 0 5px #fff;
-            animation: fall linear infinite;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.8; }
-            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        /* --- CANVAS 3D (LỚP NỀN TUYẾT) --- */
+        #webgl-canvas {
+            position: fixed; /* Cố định để không trôi khi cuộn trang */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Nằm dưới nội dung nhưng trên background màu */
+            pointer-events: none; /* Để chuột bấm xuyên qua vào các nút */
         }
 
         /* --- Layout --- */
         .container {
             position: relative;
-            z-index: 10;
+            z-index: 10; /* Nội dung phải nổi lên trên tuyết */
             max-width: 1000px;
             margin: 0 auto;
             text-align: center;
@@ -86,7 +81,7 @@
 
         .card {
             background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px); /* Giảm blur một chút để máy yếu chạy mượt hơn với 3D */
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             padding: 30px;
@@ -165,6 +160,8 @@
             margin-top: 80px;
             font-size: 0.9em;
             opacity: 0.6;
+            position: relative;
+            z-index: 10;
         }
         
         @media (max-width: 600px) {
@@ -175,7 +172,7 @@
 </head>
 <body>
 
-    <div id="snow-container"></div>
+    <canvas id="webgl-canvas"></canvas>
 
     <div class="container">
         <h1>Merry Christmas 2025</h1>
@@ -197,7 +194,7 @@
                 <span class="icon">☃️</span>
                 <h2>Xưởng Đắp Người Tuyết</h2>
                 <p>Đắp người tuyết cute mà không lo lạnh tay.</p>
-		<p>p/s: Ở đây có kèo thơm</p>
+                <p>p/s: Ở đây có kèo thơm</p>
             </a>
 
             <a href="tien_tri.html" class="card">
@@ -219,25 +216,10 @@
         </footer>
     </div>
 
-    <script>
-        // 1. Logic Tuyết rơi
-        function createSnowflakes() {
-            const snowContainer = document.getElementById('snow-container');
-            const snowflakesCount = 50; 
-            for (let i = 0; i < snowflakesCount; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.classList.add('snowflake');
-                snowflake.textContent = ['❄', '❅', '❆', '•'][Math.floor(Math.random()*4)];
-                snowflake.style.left = Math.random() * 100 + 'vw';
-                snowflake.style.animationDuration = Math.random() * 5 + 5 + 's'; 
-                snowflake.style.opacity = Math.random() * 0.6 + 0.2;
-                snowflake.style.fontSize = Math.random() * 15 + 8 + 'px';
-                snowflake.style.animationDelay = Math.random() * 5 + 's';
-                snowContainer.appendChild(snowflake);
-            }
-        }
+    <script src="three.min.js"></script>
 
-        // 2. Logic Đếm ngược
+    <script>
+        // --- PHẦN 1: LOGIC WEBSITE CŨ (Countdown & Quotes) ---
         function updateCountdown() {
             const now = new Date();
             const currentYear = now.getFullYear();
@@ -254,7 +236,6 @@
                 `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
         }
 
-        // 3. Logic Random Quote (Đã cập nhật nhiều câu hay)
         const quotes = [
             "Deadline có thể dí, nhưng tinh thần thì không được suy!",
             "Kho bạc nhà nước vẫn ở đó, việc hôm nay chưa xong mai làm tiếp. Relax thôi!",
@@ -264,32 +245,11 @@
             "Đừng để áp lực công việc làm mờ đi vẻ đẹp của người phụ nữ giỏi giang.",
             "Excel có thể treo, nhưng nụ cười của chị thì không được tắt.",
             "Chị đã vất vả nhiều rồi, nghỉ ngơi một chút đi, thế giới không sập đâu.",
-            "Công việc là quả bóng cao su, rơi xuống sẽ nảy lên. Sức khỏe là quả bóng thủy tinh, nhớ giữ gìn.",
-            "Trời lạnh rồi, ra đường nhớ quàng khăn ấm nhé.",
-            "Đừng quên uống nước ấm. Cơ thể cần được yêu thương.",
-            "Tay lạnh thì có găng tay, còn tim lạnh thì... vào đây giải trí chút nè.",
-            "Nhớ bôi kem dưỡng da tay nhé, mùa này hanh khô lắm đấy.",
-            "Gió lạnh là việc của trời, giữ ấm là việc của người thông minh.",
-            "Một cốc trà gừng lúc này sẽ tuyệt lắm đấy.",
-            "Đừng ngồi máy tính lâu quá, đứng dậy vươn vai cái nào!",
-            "Ăn uống đúng giờ nhé, cái bụng đói là không làm việc được đâu.",
-            "Nếu thấy mệt quá thì mình... kêu ca một chút rồi làm tiếp.",
-            "Hôm nay chị trông rất tuyệt (tôi đoán thế, nhưng thường là đúng).",
-            "Đừng lo lắng về những gì bạn không thể kiểm soát. Hãy ngủ một giấc thật ngon.",
-            "Cuộc sống không phải là cuộc đua, nó là một chuyến đi dạo (đôi khi có ổ gà).",
-            "Hạnh phúc là khi điện thoại đầy pin và WiFi căng đét.",
-            "Tiền không mua được hạnh phúc, nhưng mua được đồ ăn ngon, cũng gần giống thế.",
-            "Hãy yêu bản thân mình, vì đó là người sẽ đi cùng bạn suốt đời.",
-            "Chỉ cần bạn không dừng lại, việc đi chậm bao lâu không quan trọng.",
-            "Vào đây để biết là... đôi khi không làm gì cả cũng là một nghệ thuật.",
-            "Cả nguồn sống bỗng chốc thu bé lại vừa bằng... cái chăn bông.",
             "Mèo Xả gửi lời chào: Meow meow (Dịch: Chúc chị một ngày vui vẻ).",
             "Bình tĩnh, tự tin, chiến thắng (và nhớ đi về đúng giờ).",
             "Mọi chuyện rồi sẽ ổn thôi. Nếu chưa ổn thì chưa phải là kết thúc.",
             "Order một ly trà sữa ít đá, nhiều niềm vui cho ngày hôm nay.",
-            "Đừng cau mày nữa, mau già lắm đấy!",
-            "Vũ trụ nhắn gửi: Hôm nay là một ngày tốt lành.",
-            "Chúc chị một ngày làm việc hiệu quả (hoặc ít nhất là trông có vẻ hiệu quả)."
+            "Vũ trụ nhắn gửi: Hôm nay là một ngày tốt lành."
         ];
 
         function showRandomQuote() {
@@ -302,13 +262,180 @@
             }, 300);
         }
 
+        // --- PHẦN 2: LOGIC TUYẾT 3.9D + GIÓ THỔI ---
+        let scene, camera, renderer, particles;
+        let velocities = []; // Mảng chứa tốc độ rơi của từng hạt
+        let mouseX = 0, mouseY = 0;
+        let targetWindX = 0, targetWindY = 0; // Biến gió mục tiêu
+        let currentWindX = 0, currentWindY = 0; // Biến gió hiện tại (để mượt hoá chuyển động)
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        function init3D() {
+            const canvas = document.getElementById('webgl-canvas');
+            
+            // Tạo scene
+            scene = new THREE.Scene();
+            // KHÔNG set màu nền scene, để nó trong suốt (alpha) cho hiện màu đỏ đen của Body
+            
+            // Tạo camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 3000);
+            camera.position.z = 1000;
+
+            // Render trong suốt (alpha: true)
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Tạo hạt tuyết
+            const particleGeometry = new THREE.BufferGeometry();
+            const particleCount = 1500; // Số lượng hạt vừa phải để mượt trên điện thoại
+
+            const positions = new Float32Array(particleCount * 3);
+            velocities = []; // Reset mảng
+
+            for (let i = 0; i < particleCount; i++) {
+                // Vị trí ngẫu nhiên
+                positions[i * 3] = (Math.random() - 0.5) * 4000;     // X
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 4000; // Y
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 4000; // Z
+
+                // Tốc độ rơi cơ bản
+                velocities.push({
+                    y: -1 - Math.random() * 3, // Rơi xuống
+                    x: (Math.random() - 0.5) * 1, // Lắc lư ngang nhẹ
+                    z: (Math.random() - 0.5) * 1  // Lắc lư sâu nhẹ
+                });
+            }
+
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            // Tạo hình dạng hạt tuyết tròn mềm mại
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 5, // Kích thước hạt
+                transparent: true,
+                opacity: 0.8,
+                // Shader tuỳ chỉnh để hạt tròn xoe, không vuông
+                onBeforeCompile: shader => {
+                    shader.fragmentShader = shader.fragmentShader.replace(
+                        `gl_FragColor = vec4( outgoingLight, diffuseColor.a );`,
+                        `
+                        float d = length(gl_PointCoord - vec2(0.5, 0.5));
+                        if (d > 0.5) discard;
+                        // Làm mờ viền hạt tuyết
+                        gl_FragColor = vec4( outgoingLight, diffuseColor.a * (1.0 - d*1.5) );
+                        `
+                    );
+                }
+            });
+
+            particles = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particles);
+
+            // Sự kiện
+            document.addEventListener('mousemove', onDocumentMouseMove);
+            document.addEventListener('touchstart', onDocumentTouchStart, { passive: false });
+            document.addEventListener('touchmove', onDocumentTouchMove, { passive: false });
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- XỬ LÝ SỰ KIỆN GIÓ (MOUSE & TOUCH) ---
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onDocumentMouseMove(event) {
+            // Tính toán hướng gió dựa trên vị trí chuột so với tâm màn hình
+            // Chuột càng xa tâm, gió càng mạnh
+            targetWindX = (event.clientX - windowHalfX) * 0.1; 
+            targetWindY = (event.clientY - windowHalfY) * 0.1;
+        }
+
+        function onDocumentTouchStart(event) {
+            if (event.touches.length === 1) {
+                targetWindX = (event.touches[0].pageX - windowHalfX) * 0.2; // Gió mạnh hơn chút trên mobile
+                targetWindY = (event.touches[0].pageY - windowHalfY) * 0.2;
+            }
+        }
+
+        function onDocumentTouchMove(event) {
+            if (event.touches.length === 1) {
+                // event.preventDefault(); // Có thể bỏ dòng này nếu muốn cho phép cuộn trang bình thường
+                targetWindX = (event.touches[0].pageX - windowHalfX) * 0.2;
+                targetWindY = (event.touches[0].pageY - windowHalfY) * 0.2;
+            }
+        }
+
+        // --- VÒNG LẶP RENDER ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 1. Làm mượt gió (Hiệu ứng quán tính)
+            // Gió hiện tại sẽ đuổi theo gió mục tiêu từ từ -> tạo cảm giác "luồng gió" tự nhiên
+            currentWindX += (targetWindX - currentWindX) * 0.05;
+            currentWindY += (targetWindY - currentWindY) * 0.05;
+
+            // 2. Cập nhật vị trí hạt
+            const positions = particles.geometry.attributes.position.array;
+            
+            for (let i = 0; i < positions.length / 3; i++) {
+                // Lấy toạ độ cũ
+                let px = positions[i * 3];
+                let py = positions[i * 3 + 1];
+                let pz = positions[i * 3 + 2];
+
+                // --- LOGIC VẬT LÝ ---
+                // Cộng tốc độ rơi tự nhiên
+                py += velocities[i].y;
+                px += velocities[i].x;
+                pz += velocities[i].z;
+
+                // Cộng tác động của GIÓ (theo vị trí chuột)
+                // Hạt càng gần màn hình (pz > 0) càng chịu gió mạnh hơn
+                // Logic gió: Thổi hạt bay theo hướng chuột
+                px += currentWindX * 0.05; 
+                py += -currentWindY * 0.05; // Gió thổi ngược chiều Y chuột để tạo cảm giác hút/đẩy
+
+                // --- TÁI TẠO HẠT (Respanw) ---
+                // Nếu rơi xuống đáy hoặc bay quá xa -> Đưa về đỉnh hoặc phía đối diện
+                if (py < -2000) {
+                    py = 2000;
+                    px = (Math.random() - 0.5) * 4000;
+                    pz = (Math.random() - 0.5) * 4000;
+                }
+                // Nếu bị gió thổi bay quá xa sang 2 bên
+                if (Math.abs(px) > 3000) px = px * -0.9; 
+
+                // Cập nhật toạ độ mới
+                positions[i * 3] = px;
+                positions[i * 3 + 1] = py;
+                positions[i * 3 + 2] = pz;
+            }
+            
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            // Xoay nhẹ toàn bộ hệ thống hạt để tạo cảm giác không gian trôi nổi
+            scene.rotation.y += 0.0005;
+
+            renderer.render(scene, camera);
+        }
+
+        // --- CHẠY CHƯƠNG TRÌNH ---
         window.onload = function() {
-            createSnowflakes();
+            // Chạy logic cũ
             updateCountdown();
             setInterval(updateCountdown, 1000);
             showRandomQuote();
+            
+            // Chạy logic mới (3D)
+            init3D();
+            animate();
         };
     </script>
 </body>
-
 </html>
