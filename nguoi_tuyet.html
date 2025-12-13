@@ -7,23 +7,25 @@
     <style>
         body {
             margin: 0;
-            overflow: hidden;
+            overflow: hidden; /* Chặn cuộn tuyệt đối */
             background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
             font-family: 'Arial', sans-serif;
-            touch-action: none; 
+            touch-action: none; /* Chặn hành động mặc định của trình duyệt */
             -webkit-user-select: none;
             user-select: none;
+            position: fixed; /* Cố định body để không bị nảy trên iOS */
+            width: 100%;
+            height: 100%;
         }
         canvas { display: block; }
         
-        /* Container chứa các nút điều khiển */
         #controls {
             position: absolute;
             top: 20px;
             left: 20px;
             z-index: 100;
             display: flex;
-            gap: 15px; /* Khoảng cách giữa 2 nút */
+            gap: 15px;
         }
 
         .btn {
@@ -40,11 +42,10 @@
             font-size: 22px;
             border: 2px solid rgba(255,255,255,0.5);
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent; /* Bỏ highlight khi chạm */
         }
 
-        .btn:active {
-            background: rgba(255, 255, 255, 0.5);
-        }
+        .btn:active { background: rgba(255, 255, 255, 0.5); }
         
         #instruction {
             position: absolute;
@@ -63,7 +64,9 @@
 <body>
 
 <div id="controls">
-    <div class="btn" onclick="window.location.href='index.html'">🏠</div> <div class="btn" onclick="location.reload()">↺</div> </div>
+    <div class="btn" ontouchend="window.location.href='index.html'; event.preventDefault();" onclick="window.location.href='index.html'">🏠</div> 
+    <div class="btn" ontouchend="location.reload(); event.preventDefault();" onclick="location.reload()">↺</div> 
+</div>
 
 <div id="instruction">Chạm để thả - 5 quả là chốt kèo!</div>
 <canvas id="gameCanvas"></canvas>
@@ -72,7 +75,7 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // --- KHO KÈO ---
+    // --- KHO KÈO (GIỮ NGUYÊN) ---
     const winBets = [
         { t: "5 QUẢ! ĐỈNH CAO!", l1: "Long phải bao chị đi ăn", l2: "Haidilao ngay lập tức!" },
         { t: "THẮNG RỒI!", l1: "Long tình nguyện làm 'xe ôm'", l2: "đưa đón chị cả tuần tới!" },
@@ -128,19 +131,34 @@
     let startCameraY = 0;
     let hasMoved = false;
 
+    // Biến mới để fix lỗi spam cảm ứng
+    let lastDropTime = 0; 
+    const DROP_COOLDOWN = 300; // 300ms nghỉ giữa các lần thả
+
     // --- SETUP ---
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
         baseRadius = Math.min(width, height) * 0.11; 
         ropeLength = height * 0.25; 
-        if(gameState === 'START') anchorX = width / 2;
-        initSnow();
-        initTrees();
+        
+        // Fix: Chỉ reset vị trí nếu chưa chơi hoặc đang start, tránh reset khi thanh địa chỉ ẩn hiện
+        if(gameState === 'START') {
+            anchorX = width / 2;
+            initTrees(); // Chỉ tạo cây lại khi mới vào
+        }
+        
+        // Luôn đảm bảo có tuyết
+        if(snowflakes.length === 0) initSnow();
         if(balls.length === 0) initGame();
     }
-    window.addEventListener('resize', resize);
-    window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+    
+    // Fix: Dùng sự kiện resize thông minh hơn cho mobile
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(resize, 200);
+    });
 
     function initSnow() {
         snowflakes = [];
@@ -169,7 +187,6 @@
         score = 0;
         cameraY = 0;
         anchorX = width / 2;
-        
         isHardMode = Math.random() > 0.5;
 
         balls.push({
@@ -182,7 +199,6 @@
         gameState = 'PLAYING';
     }
 
-    // --- LOGIC GÀI (GIỮ NGUYÊN) ---
     function spawnNextBall() {
         let minR = baseRadius * 0.75;
         let maxR = baseRadius * 0.95;
@@ -194,11 +210,8 @@
         
         if (isHardMode) {
             let trapChance = Math.random();
-            if (trapChance < 0.35) {
-                finalSpeed = baseSpeed * 2.2;
-            } else if (trapChance < 0.5) {
-                finalSpeed = baseSpeed * 0.5;
-            }
+            if (trapChance < 0.35) finalSpeed = baseSpeed * 2.2;
+            else if (trapChance < 0.5) finalSpeed = baseSpeed * 0.5;
             shiftRange = width * 0.35; 
         } else {
             let trapChance = Math.random();
@@ -222,6 +235,11 @@
     }
 
     function dropBall() {
+        // Fix: Thêm kiểm tra thời gian để chống spam click
+        let now = Date.now();
+        if (now - lastDropTime < DROP_COOLDOWN) return;
+        lastDropTime = now;
+
         if (gameState !== 'PLAYING') return;
 
         let dropX = anchorX + Math.sin(currentBall.angle) * ropeLength;
@@ -269,7 +287,7 @@
             p.y += p.d; p.x += Math.sin(p.y * 0.02) * 0.3;
             if(p.y > height) { p.y = -10; p.x = Math.random()*width; }
         }
-        if (gameState === 'PLAYING') {
+        if (gameState === 'PLAYING' && currentBall) { // Check currentBall tồn tại
             currentBall.angle += currentBall.speed;
             if (Math.abs(currentBall.angle) > 1.1) currentBall.speed *= -1;
             
@@ -358,6 +376,7 @@
         if (!ball.funnyProps) return;
         let p = ball.funnyProps;
         let r = ball.radius;
+        // (Giữ nguyên logic vẽ mặt cười...)
         if (p.eyeType === 0) { 
              drawEye(ball.x - r/3, ball.y - r/4, r/4, true); drawEye(ball.x + r/3, ball.y - r/4, r/4, true);
         } else if (p.eyeType === 1) { 
@@ -450,8 +469,13 @@
     function getClientY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
 
     function handleStart(e) {
-        // Chỉ xử lý nếu không click vào nút trong #controls
+        // Fix: Chặn sự kiện nổi bọt
         if(e.target.closest('#controls')) return;
+        
+        // Fix: Nếu là touchstart, chặn luôn mouse event giả lập sau đó
+        if(e.type === 'touchstart') {
+            e.preventDefault(); 
+        }
         
         if (gameState === 'GAMEOVER' || gameState === 'GAMEWIN') {
             isDragging = true;
@@ -476,18 +500,30 @@
     function handleEnd(e) {
         if (isDragging) {
             isDragging = false;
-            if (!hasMoved) initGame();
+            // Fix: Tăng ngưỡng di chuyển để tránh reset nhầm khi chạm nhẹ
+            if (!hasMoved) {
+                 // Debounce cho nút replay luôn
+                 let now = Date.now();
+                 if (now - lastDropTime > DROP_COOLDOWN) {
+                     lastDropTime = now;
+                     initGame();
+                 }
+            }
         }
     }
 
+    // Fix: Gắn event listener chuẩn cho mobile
     canvas.addEventListener('mousedown', handleStart);
     canvas.addEventListener('mousemove', handleMove);
     canvas.addEventListener('mouseup', handleEnd);
+    
+    // Passive: false để có thể dùng preventDefault() chặn cuộn trang
     canvas.addEventListener('touchstart', handleStart, {passive: false});
     canvas.addEventListener('touchmove', handleMove, {passive: false});
     canvas.addEventListener('touchend', handleEnd);
     
     resize();
+    initTrees(); // Đảm bảo cây cối có ngay từ đầu
     function loop() { update(); draw(); requestAnimationFrame(loop); }
     loop();
 
