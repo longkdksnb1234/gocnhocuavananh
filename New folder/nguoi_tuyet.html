@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Xếp Tuyết Noel - 5 Quả Chốt Kèo</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            font-family: 'Arial', sans-serif;
+            touch-action: none; 
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        canvas { display: block; }
+        
+        /* Container chứa các nút điều khiển */
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 15px; /* Khoảng cách giữa 2 nút */
+        }
+
+        .btn {
+            width: 45px; 
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+            border: 2px solid rgba(255,255,255,0.5);
+            transition: background 0.2s;
+        }
+
+        .btn:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        #instruction {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: #bdc3c7;
+            pointer-events: none;
+            font-size: 16px;
+            text-shadow: 0 1px 2px black;
+            z-index: 90;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="controls">
+    <div class="btn" onclick="window.location.href='index.html'">🏠</div> <div class="btn" onclick="location.reload()">↺</div> </div>
+
+<div id="instruction">Chạm để thả - 5 quả là chốt kèo!</div>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- KHO KÈO ---
+    const winBets = [
+        { t: "5 QUẢ! ĐỈNH CAO!", l1: "Long phải bao chị đi ăn", l2: "Haidilao ngay lập tức!" },
+        { t: "THẮNG RỒI!", l1: "Long tình nguyện làm 'xe ôm'", l2: "đưa đón chị cả tuần tới!" },
+        { t: "XUẤT SẮC!", l1: "Chị được quyền yêu cầu", l2: "Long làm bất cứ điều gì trong 24h!" },
+        { t: "WINNER!", l1: "Long phải mua tặng chị", l2: "một món quà Noel bí mật!" },
+        { t: "QUÁ DỮ!", l1: "Long phải hát tặng chị", l2: "một bài tình ca trước đám đông!" },
+        { t: "CHỊ THẮNG!", l1: "Long phải set avatar", l2: "hình chị chọn trong 3 ngày!" },
+        { t: "GIRL BOSS!", l1: "Long phải khen chị xinh", l2: "liên tục 50 lần!" },
+        { t: "KÈO THƠM!", l1: "Long bao trọn gói", l2: "buổi đi chơi Noel này!" },
+        { t: "VIP PRO!", l1: "Long phải cõng chị", l2: "đi dạo phố đi bộ!" },
+        { t: "KHÔNG ĐỐI THỦ!", l1: "Long phải làm video TikTok", l2: "múa quạt tặng chị!" },
+        { t: "THÁNH GAME!", l1: "Chị chọn địa điểm,", l2: "Long lo phần thanh toán!" },
+        { t: "HAY QUÁ!", l1: "Long phải gửi chị 500k", l2: "tiền tiêu vặt lì xì sớm!" },
+        { t: "TUYỆT VỜI!", l1: "Long phải massage vai", l2: "cho chị 30 phút!" },
+        { t: "10 ĐIỂM!", l1: "Long phải gọi chị là", l2: "'Nữ hoàng' trong 1 ngày!" }
+    ];
+
+    const loseBets = [
+        { t: "TRƯỢT TAY RỒI!", l1: "Chị Vân Anh phải mời Long", l2: "đi ăn kem mùa đông!" },
+        { t: "TOANG RỒI!", l1: "Chị phải hát tặng Long", l2: "bài 'Jingle Bells' giọng vịt!" },
+        { t: "LỆCH TÂM!", l1: "Chị Vân Anh phải làm 'ôm'", l2: "cho Long chở đi lượn phố!" },
+        { t: "NON QUÁ!", l1: "Chị phải mời Long đi", l2: "xem phim (Long chọn phim)!" },
+        { t: "GÀI KÈO THÀNH CÔNG!", l1: "Chị phải set avatar đôi", l2: "với Long trong đêm Noel!" },
+        { t: "THUA RỒI NHA!", l1: "Chị phải chúc Long ngủ ngon", l2: "bằng giọng ngọt ngào nhất!" },
+        { t: "RỚT ĐÀI!", l1: "Chị phải bao Long", l2: "một chầu trà sữa full topping!" },
+        { t: "GAME OVER!", l1: "Chị phải khen Long đẹp trai", l2: "công khai trên Facebook!" },
+        { t: "HỤT RỒI!", l1: "Chị phải nắm tay Long", l2: "đi dạo hết đêm Noel!" },
+        { t: "XUI THÔI!", l1: "Chị phải đấm lưng cho Long", l2: "15 phút nha!" },
+        { t: "PHẠT NẶNG!", l1: "Chị phải gửi Long 1 tấm ảnh", l2: "hồi bé siêu ngố tàu!" },
+        { t: "BẮT ĐỀN ĐÊ!", l1: "Chị phải làm gối ôm", l2: "cho Long khi xem phim kinh dị!" },
+        { t: "THUA KÈO!", l1: "Chị phải gọi Long là", l2: "'Oppa' trong 24h!" },
+        { t: "LỆCH PHA!", l1: "Chị phải mua tặng Long", l2: "một đôi tất Noel cute!" },
+        { t: "TẠCH RỒI!", l1: "Chị phải đi ăn lẩu nướng", l2: "với Long ngay tối nay!" },
+        { t: "YẾU QUÁ!", l1: "Chị phải thu âm bài hát", l2: "làm báo thức cho Long!" }
+    ];
+
+    // --- CẤU HÌNH ---
+    let width, height;
+    let balls = []; 
+    let currentBall = null;
+    let score = 0;
+    let gameState = 'START'; 
+    let cameraY = 0;
+    let baseRadius; 
+    let ropeLength; 
+    let snowflakes = [];
+    let trees = [];
+    let anchorX = 0; 
+    let activeBet = null; 
+    let isHardMode = false;
+    let isDragging = false;
+    let startY = 0;
+    let startCameraY = 0;
+    let hasMoved = false;
+
+    // --- SETUP ---
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        baseRadius = Math.min(width, height) * 0.11; 
+        ropeLength = height * 0.25; 
+        if(gameState === 'START') anchorX = width / 2;
+        initSnow();
+        initTrees();
+        if(balls.length === 0) initGame();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+
+    function initSnow() {
+        snowflakes = [];
+        for(let i=0; i<120; i++) { 
+            snowflakes.push({
+                x: Math.random() * width, y: Math.random() * height,
+                r: Math.random() * 2 + 1, d: Math.random() * 1 + 0.5 
+            });
+        }
+    }
+
+    function initTrees() {
+        trees = [];
+        let numTrees = Math.floor(width / 50);
+        for(let i=0; i<numTrees; i++) {
+            trees.push({
+                x: Math.random() * width, y: height - 20,
+                h: height * 0.1 + Math.random() * 50, 
+                color: Math.random() > 0.5 ? '#145A32' : '#196F3D' 
+            });
+        }
+    }
+
+    function initGame() {
+        balls = [];
+        score = 0;
+        cameraY = 0;
+        anchorX = width / 2;
+        
+        isHardMode = Math.random() > 0.5;
+
+        balls.push({
+            x: width / 2,
+            y: height - baseRadius - 20, 
+            radius: baseRadius,
+            funnyProps: null
+        });
+        spawnNextBall();
+        gameState = 'PLAYING';
+    }
+
+    // --- LOGIC GÀI (GIỮ NGUYÊN) ---
+    function spawnNextBall() {
+        let minR = baseRadius * 0.75;
+        let maxR = baseRadius * 0.95;
+        let newRadius = Math.floor(Math.random() * (maxR - minR + 1)) + minR;
+        
+        let baseSpeed = 0.02 + (score * 0.002); 
+        let finalSpeed = baseSpeed;
+        let shiftRange = 0;
+        
+        if (isHardMode) {
+            let trapChance = Math.random();
+            if (trapChance < 0.35) {
+                finalSpeed = baseSpeed * 2.2;
+            } else if (trapChance < 0.5) {
+                finalSpeed = baseSpeed * 0.5;
+            }
+            shiftRange = width * 0.35; 
+        } else {
+            let trapChance = Math.random();
+            if (trapChance < 0.15) finalSpeed = baseSpeed * 1.3; 
+            shiftRange = width * 0.15;
+        }
+        
+        let shift = (Math.random() * shiftRange) - (shiftRange/2); 
+        let prevBallX = balls[balls.length-1].x;
+        let potentialAnchorX = (width / 2) + shift;
+        let maxDist = ropeLength * Math.sin(0.8); 
+        
+        if (potentialAnchorX - prevBallX > maxDist) anchorX = prevBallX + maxDist;
+        else if (prevBallX - potentialAnchorX > maxDist) anchorX = prevBallX - maxDist;
+        else anchorX = potentialAnchorX;
+
+        currentBall = {
+            x: anchorX, y: 100, radius: newRadius,
+            angle: 0, speed: finalSpeed, funnyProps: null
+        };
+    }
+
+    function dropBall() {
+        if (gameState !== 'PLAYING') return;
+
+        let dropX = anchorX + Math.sin(currentBall.angle) * ropeLength;
+        let prevBall = balls[balls.length - 1];
+
+        let overlap = Math.min(prevBall.radius, currentBall.radius) * 0.3;
+        let dropY = prevBall.y - prevBall.radius - currentBall.radius + overlap;
+
+        let deltaX = Math.abs(dropX - prevBall.x);
+        let limit = prevBall.radius; 
+
+        if (deltaX > limit) { 
+            gameOver();
+        } else {
+            balls.push({
+                x: dropX, y: dropY, radius: currentBall.radius,
+                funnyProps: null
+            });
+            score++;
+            if (score >= 5) gameWin();
+            else spawnNextBall();
+        }
+    }
+
+    function gameOver() {
+        gameState = 'GAMEOVER';
+        activeBet = loseBets[Math.floor(Math.random() * loseBets.length)];
+    }
+
+    function gameWin() {
+        gameState = 'GAMEWIN';
+        activeBet = winBets[Math.floor(Math.random() * winBets.length)];
+        balls.forEach(ball => {
+            ball.funnyProps = {
+                eyeType: Math.floor(Math.random() * 4),
+                mouthType: Math.floor(Math.random() * 4),
+                accessoryColor: `hsl(${Math.random() * 360}, 70%, 50%)`
+            };
+        });
+    }
+
+    // --- UPDATE ---
+    function update() {
+        for(let p of snowflakes) {
+            p.y += p.d; p.x += Math.sin(p.y * 0.02) * 0.3;
+            if(p.y > height) { p.y = -10; p.x = Math.random()*width; }
+        }
+        if (gameState === 'PLAYING') {
+            currentBall.angle += currentBall.speed;
+            if (Math.abs(currentBall.angle) > 1.1) currentBall.speed *= -1;
+            
+            let topBall = balls[balls.length - 1];
+            let targetY = 0;
+            if (topBall.y - cameraY < height / 2) {
+                targetY = (height / 2) - topBall.y + height*0.3;
+            }
+            cameraY += (targetY - cameraY) * 0.05;
+        } 
+    }
+
+    function draw() {
+        let bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+        bgGradient.addColorStop(0, "#0f2027"); bgGradient.addColorStop(1, "#2c5364");
+        ctx.fillStyle = bgGradient; ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.beginPath();
+        for(let p of snowflakes) { 
+            if(p.r < 2) { ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2, true); }
+        }
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(0, cameraY);
+
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, height - 30, width, 500); 
+        for(let t of trees) drawTree(t.x, t.y, t.h, t.color);
+
+        for (let i = 0; i < balls.length; i++) {
+             drawPlainBall(balls[i]);
+             if (gameState === 'GAMEWIN') drawFunnyDecor(balls[i]);
+        }
+
+        if (gameState === 'PLAYING' && currentBall) {
+            let ballX = anchorX + Math.sin(currentBall.angle) * ropeLength;
+            let prev = balls[balls.length-1];
+            let overlap = Math.min(prev.radius, currentBall.radius) * 0.3;
+            let displayY = (prev.y - prev.radius - currentBall.radius + overlap); 
+            
+            ctx.beginPath(); 
+            let anchorY = displayY - ropeLength - height*0.2; 
+            ctx.moveTo(anchorX, anchorY); 
+            ctx.lineTo(ballX, displayY);
+            ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2; ctx.stroke();
+            
+            ctx.fillStyle="red"; ctx.beginPath(); ctx.arc(anchorX, anchorY, 5, 0, Math.PI*2); ctx.fill();
+
+            drawPlainBall({x: ballX, y: displayY, radius: currentBall.radius});
+        }
+        ctx.restore();
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.beginPath();
+        for(let p of snowflakes) { 
+            if(p.r >= 2) { ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2, true); }
+        }
+        ctx.fill();
+
+        drawUI();
+    }
+
+    function drawTree(x, y, h, color) {
+        ctx.fillStyle = "#5D4037"; ctx.fillRect(x - 3, y - 8, 6, 8); 
+        ctx.fillStyle = color;
+        for(let i=0; i<3; i++) { 
+            ctx.beginPath();
+            ctx.moveTo(x, y - 8 - h + (i*(h/2.8)));
+            ctx.lineTo(x - 12 - (i*5), y - 8 - (i*(h/3.5)));
+            ctx.lineTo(x + 12 + (i*5), y - 8 - (i*(h/3.5)));
+            ctx.fill();
+        }
+    }
+
+    function drawPlainBall(ball) {
+        let grd = ctx.createRadialGradient(ball.x - ball.radius/3, ball.y - ball.radius/3, 5, ball.x, ball.y, ball.radius);
+        grd.addColorStop(0, "#fff");
+        grd.addColorStop(0.8, "#d7e1ec"); 
+        grd.addColorStop(1, "#b0bec5");
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawFunnyDecor(ball) {
+        if (!ball.funnyProps) return;
+        let p = ball.funnyProps;
+        let r = ball.radius;
+        if (p.eyeType === 0) { 
+             drawEye(ball.x - r/3, ball.y - r/4, r/4, true); drawEye(ball.x + r/3, ball.y - r/4, r/4, true);
+        } else if (p.eyeType === 1) { 
+             ctx.strokeStyle = "#333"; ctx.lineWidth = 2;
+             ctx.beginPath(); ctx.moveTo(ball.x - r/2, ball.y - r/4); ctx.lineTo(ball.x, ball.y - r/4); ctx.stroke();
+             ctx.beginPath(); ctx.moveTo(ball.x + r/4, ball.y - r/4); ctx.lineTo(ball.x + r/2 + 5, ball.y - r/4); ctx.stroke();
+        } else if (p.eyeType === 2) { 
+             drawEye(ball.x - r/3, ball.y - r/4, r/3, false); drawEye(ball.x + r/3, ball.y - r/4, r/6, false);
+        } else { 
+             ctx.strokeStyle = "#333"; ctx.lineWidth = 2; drawX(ball.x - r/3, ball.y - r/4, r/5); drawX(ball.x + r/3, ball.y - r/4, r/5);
+        }
+        if (p.mouthType === 0) { 
+             ctx.fillStyle = "#333"; ctx.beginPath(); ctx.arc(ball.x, ball.y + r/6, r/3, 0, Math.PI); ctx.fill();
+             ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(ball.x, ball.y + r/3, r/6, 0, Math.PI); ctx.fill(); 
+        } else if (p.mouthType === 1) { 
+             ctx.fillStyle = "white"; ctx.strokeStyle="black"; ctx.lineWidth=1;
+             ctx.fillRect(ball.x-r/4, ball.y+r/6, r/2, r/3); ctx.strokeRect(ball.x-r/4, ball.y+r/6, r/2, r/3);
+             ctx.beginPath(); ctx.moveTo(ball.x, ball.y+r/6); ctx.lineTo(ball.x, ball.y+r/2); ctx.stroke();
+        } else if (p.mouthType === 2) { 
+             ctx.strokeStyle = "#333"; ctx.lineWidth = 2; ctx.beginPath();
+             ctx.moveTo(ball.x - r/3, ball.y + r/4); ctx.lineTo(ball.x + r/3, ball.y + r/6); ctx.stroke();
+        } else { 
+             ctx.strokeStyle = "#333"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(ball.x-r/4, ball.y+r/4); ctx.lineTo(ball.x+r/4, ball.y+r/4); ctx.stroke();
+             ctx.fillStyle = "#81D4FA"; ctx.beginPath(); ctx.arc(ball.x+r/4, ball.y+r/2, r/10, 0, Math.PI*2); ctx.fill();
+        }
+    }
+    function drawEye(x, y, size, googly) {
+        ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        let px = x, py = y;
+        if(googly) { px += (Math.random()-0.5)*size/2; py += (Math.random()-0.5)*size/2; }
+        ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(px, py, size/3, 0, Math.PI*2); ctx.fill();
+    }
+    function drawX(x, y, size) {
+        ctx.beginPath(); ctx.moveTo(x-size, y-size); ctx.lineTo(x+size, y+size); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x+size, y-size); ctx.lineTo(x-size, y+size); ctx.stroke();
+    }
+
+    function drawUI() {
+        ctx.fillStyle = "white"; ctx.font = "bold 24px Arial"; ctx.textAlign = "right";
+        ctx.shadowColor="black"; ctx.shadowBlur=4;
+        ctx.fillText("Điểm: " + score + "/5", width - 20, 40);
+        ctx.shadowBlur=0;
+
+        if (gameState === 'GAMEWIN' && activeBet) {
+            drawTextNoBg("#27ae60", activeBet.t, activeBet.l1, activeBet.l2);
+        }
+        else if (gameState === 'GAMEOVER' && activeBet) {
+             drawOverlay("#c0392b", activeBet.t, activeBet.l1, activeBet.l2);
+        }
+    }
+
+    function drawTextNoBg(color, title, line1, line2) {
+        ctx.textAlign = "center";
+        let titleSize = Math.min(36, width * 0.08);
+        let subSize = Math.min(24, width * 0.05);
+        let noteSize = Math.min(16, width * 0.04);
+        
+        ctx.lineWidth = 4; ctx.strokeStyle = "black";
+        ctx.font = `bold ${titleSize}px Arial`; ctx.strokeText(title, width/2, height/2 - 50);
+        ctx.font = `bold ${subSize}px Arial`; 
+        ctx.strokeText(line1, width/2, height/2 + 10);
+        ctx.strokeText(line2, width/2, height/2 + 45);
+        ctx.font = `${noteSize}px Arial`; ctx.strokeText("(Vuốt để xem tháp - Chạm để chơi lại)", width/2, height/2 + 100);
+
+        ctx.fillStyle = color; ctx.font = `bold ${titleSize}px Arial`; ctx.fillText(title, width/2, height/2 - 50);
+        ctx.fillStyle = "white"; ctx.font = `bold ${subSize}px Arial`; 
+        ctx.fillText(line1, width/2, height/2 + 10);
+        ctx.fillText(line2, width/2, height/2 + 45);
+        ctx.fillStyle = "#bdc3c7"; ctx.font = `${noteSize}px Arial`; 
+        ctx.fillText("(Vuốt để xem tháp - Chạm để chơi lại)", width/2, height/2 + 100);
+    }
+
+    function drawOverlay(color, title, line1, line2) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0,0,width,height);
+        ctx.textAlign = "center";
+        
+        let titleSize = Math.min(36, width * 0.08);
+        let subSize = Math.min(24, width * 0.05);
+        let noteSize = Math.min(16, width * 0.04);
+        
+        ctx.fillStyle = color; ctx.font = `bold ${titleSize}px Arial`; ctx.fillText(title, width/2, height/2 - 50);
+        ctx.fillStyle = "white"; ctx.font = `bold ${subSize}px Arial`; 
+        ctx.fillText(line1, width/2, height/2 + 10);
+        ctx.fillText(line2, width/2, height/2 + 45);
+        ctx.fillStyle = "#bdc3c7"; ctx.font = `${noteSize}px Arial`; 
+        ctx.fillText("(Vuốt để xem tháp - Chạm để chơi lại)", width/2, height/2 + 100);
+    }
+
+    function getClientY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+
+    function handleStart(e) {
+        // Chỉ xử lý nếu không click vào nút trong #controls
+        if(e.target.closest('#controls')) return;
+        
+        if (gameState === 'GAMEOVER' || gameState === 'GAMEWIN') {
+            isDragging = true;
+            startY = getClientY(e);
+            startCameraY = cameraY;
+            hasMoved = false;
+        } else {
+            dropBall();
+        }
+    }
+
+    function handleMove(e) {
+        if (isDragging) {
+            let y = getClientY(e);
+            let dy = y - startY;
+            if (Math.abs(dy) > 5) hasMoved = true; 
+            cameraY = startCameraY + dy;
+            e.preventDefault(); 
+        }
+    }
+
+    function handleEnd(e) {
+        if (isDragging) {
+            isDragging = false;
+            if (!hasMoved) initGame();
+        }
+    }
+
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('touchstart', handleStart, {passive: false});
+    canvas.addEventListener('touchmove', handleMove, {passive: false});
+    canvas.addEventListener('touchend', handleEnd);
+    
+    resize();
+    function loop() { update(); draw(); requestAnimationFrame(loop); }
+    loop();
+
+</script>
+</body>
+</html>

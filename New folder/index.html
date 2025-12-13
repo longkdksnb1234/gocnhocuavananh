@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vân Anh's Winter Wonderland ❄️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Cấu hình chung --- */
+        :root {
+            --night-blue: #0f172a;
+            --warm-red: #7f1d1d;
+            --gold: #fbbf24;
+            --white: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            color: var(--white);
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--night-blue) 0%, var(--night-blue) 40%, #581c1c 80%, var(--warm-red) 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* --- Hiệu ứng tuyết rơi --- */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1em;
+            text-shadow: 0 0 5px #fff;
+            animation: fall linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Layout --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 4.5em;
+            margin-bottom: 5px;
+            text-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+            color: var(--gold);
+            animation: floatTitle 3s ease-in-out infinite;
+        }
+
+        @keyframes floatTitle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            margin-bottom: 50px;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        /* --- Grid Menu --- */
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--gold);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .card:hover .icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .card .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .card p {
+            font-size: 0.95em;
+            line-height: 1.6;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        /* --- Style riêng cho Góc Chill --- */
+        .card.chill-zone {
+            grid-column: 1 / -1;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        #countdown {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        #daily-quote {
+            font-style: italic;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        footer {
+            margin-top: 80px;
+            font-size: 0.9em;
+            opacity: 0.6;
+        }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 3em; }
+            #countdown { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="snow-container"></div>
+
+    <div class="container">
+        <h1>Merry Christmas 2025</h1>
+        <div class="subtitle">Một chút bình yên mùa Noel</div>
+
+        <div class="grid-menu">
+            
+            <div class="card chill-zone" onclick="showRandomQuote()">
+                <span class="icon">🕰️</span>
+                <h2>Trạm Sạc Năng Lượng</h2>
+                <div id="countdown">Loading...</div>
+                <div id="daily-quote" style="cursor: pointer;" title="Bấm để xem câu khác">
+                    "Đang tải yêu thương..."
+                </div>
+                <p style="font-size: 0.8em; margin-top: 10px; opacity: 0.5;">(Chạm vào câu nói để xem thêm)</p>
+            </div>
+
+            <a href="nguoi_tuyet.html" class="card">
+                <span class="icon">☃️</span>
+                <h2>Xưởng Đắp Người Tuyết</h2>
+                <p>Đắp người tuyết cute mà không lo lạnh tay.</p>
+		<p>p/s: Ở đây có kèo thơm</p>
+            </a>
+
+            <a href="tien_tri.html" class="card">
+                <span class="icon">🔮</span>
+                <h2>Vũ Trụ Tiên Tri</h2>
+                <p>Kết nối năng lượng vũ trụ để gỡ rối tơ lòng (hoặc đơn giản là chọn màu son).</p>
+            </a>
+
+            <a href="goc_cua_xa.html" class="card">
+                <span class="icon">😺</span>
+                <h2>Góc Của Xả</h2>
+                <p>Những câu chuyện "vô tri" giúp xả stress cực mạnh.</p>
+            </a>
+
+        </div>
+
+        <footer>
+            From Long with <span style="color: #e74c3c;">❤</span> for Van Anh
+        </footer>
+    </div>
+
+    <script>
+        // 1. Logic Tuyết rơi
+        function createSnowflakes() {
+            const snowContainer = document.getElementById('snow-container');
+            const snowflakesCount = 50; 
+            for (let i = 0; i < snowflakesCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.textContent = ['❄', '❅', '❆', '•'][Math.floor(Math.random()*4)];
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.animationDuration = Math.random() * 5 + 5 + 's'; 
+                snowflake.style.opacity = Math.random() * 0.6 + 0.2;
+                snowflake.style.fontSize = Math.random() * 15 + 8 + 'px';
+                snowflake.style.animationDelay = Math.random() * 5 + 's';
+                snowContainer.appendChild(snowflake);
+            }
+        }
+
+        // 2. Logic Đếm ngược
+        function updateCountdown() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let targetDate = new Date(currentYear, 11, 25, 0, 0, 0); 
+            if (now > targetDate) targetDate = new Date(currentYear + 1, 11, 25, 0, 0, 0);
+            
+            const diff = targetDate - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = 
+                `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
+        }
+
+        // 3. Logic Random Quote (Đã cập nhật nhiều câu hay)
+        const quotes = [
+            "Deadline có thể dí, nhưng tinh thần thì không được suy!",
+            "Kho bạc nhà nước vẫn ở đó, việc hôm nay chưa xong mai làm tiếp. Relax thôi!",
+            "Số liệu có thể khô khan, nhưng tâm hồn chị phải luôn tươi mát.",
+            "Sau cơn mưa trời lại sáng. Sau quyết toán là... Tết Dương!",
+            "Một nụ cười bằng mười thang thuốc bổ, nhưng một giấc ngủ ngon còn bổ hơn.",
+            "Đừng để áp lực công việc làm mờ đi vẻ đẹp của người phụ nữ giỏi giang.",
+            "Excel có thể treo, nhưng nụ cười của chị thì không được tắt.",
+            "Chị đã vất vả nhiều rồi, nghỉ ngơi một chút đi, thế giới không sập đâu.",
+            "Công việc là quả bóng cao su, rơi xuống sẽ nảy lên. Sức khỏe là quả bóng thủy tinh, nhớ giữ gìn.",
+            "Trời lạnh rồi, ra đường nhớ quàng khăn ấm nhé.",
+            "Đừng quên uống nước ấm. Cơ thể cần được yêu thương.",
+            "Tay lạnh thì có găng tay, còn tim lạnh thì... vào đây giải trí chút nè.",
+            "Nhớ bôi kem dưỡng da tay nhé, mùa này hanh khô lắm đấy.",
+            "Gió lạnh là việc của trời, giữ ấm là việc của người thông minh.",
+            "Một cốc trà gừng lúc này sẽ tuyệt lắm đấy.",
+            "Đừng ngồi máy tính lâu quá, đứng dậy vươn vai cái nào!",
+            "Ăn uống đúng giờ nhé, cái bụng đói là không làm việc được đâu.",
+            "Nếu thấy mệt quá thì mình... kêu ca một chút rồi làm tiếp.",
+            "Hôm nay chị trông rất tuyệt (tôi đoán thế, nhưng thường là đúng).",
+            "Đừng lo lắng về những gì bạn không thể kiểm soát. Hãy ngủ một giấc thật ngon.",
+            "Cuộc sống không phải là cuộc đua, nó là một chuyến đi dạo (đôi khi có ổ gà).",
+            "Hạnh phúc là khi điện thoại đầy pin và WiFi căng đét.",
+            "Tiền không mua được hạnh phúc, nhưng mua được đồ ăn ngon, cũng gần giống thế.",
+            "Hãy yêu bản thân mình, vì đó là người sẽ đi cùng bạn suốt đời.",
+            "Chỉ cần bạn không dừng lại, việc đi chậm bao lâu không quan trọng.",
+            "Vào đây để biết là... đôi khi không làm gì cả cũng là một nghệ thuật.",
+            "Cả nguồn sống bỗng chốc thu bé lại vừa bằng... cái chăn bông.",
+            "Mèo Xả gửi lời chào: Meow meow (Dịch: Chúc chị một ngày vui vẻ).",
+            "Bình tĩnh, tự tin, chiến thắng (và nhớ đi về đúng giờ).",
+            "Mọi chuyện rồi sẽ ổn thôi. Nếu chưa ổn thì chưa phải là kết thúc.",
+            "Order một ly trà sữa ít đá, nhiều niềm vui cho ngày hôm nay.",
+            "Đừng cau mày nữa, mau già lắm đấy!",
+            "Vũ trụ nhắn gửi: Hôm nay là một ngày tốt lành.",
+            "Chúc chị một ngày làm việc hiệu quả (hoặc ít nhất là trông có vẻ hiệu quả)."
+        ];
+
+        function showRandomQuote() {
+            const quoteEl = document.getElementById('daily-quote');
+            quoteEl.style.opacity = 0;
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                quoteEl.textContent = `"${quotes[randomIndex]}"`;
+                quoteEl.style.opacity = 1;
+            }, 300);
+        }
+
+        window.onload = function() {
+            createSnowflakes();
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+            showRandomQuote();
+        };
+    </script>
+</body>
+</html>
